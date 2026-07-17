@@ -7,7 +7,7 @@ description:Smart Cart Dashboard est une interface d'administration développée
 
 - Node.js
 - Express.js
-- MySQL
+- Mongo db
 - HTML5
 - CSS3
 - JavaScript
