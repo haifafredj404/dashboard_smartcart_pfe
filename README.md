@@ -12,7 +12,6 @@ Description: Smart Cart Dashboard est une interface d'administration développé
 - CSS3
 - JavaScript
 - JWT Authentication
-- Chart.js
 
 ---
 
