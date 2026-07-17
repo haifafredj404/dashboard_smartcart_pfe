@@ -1,7 +1,7 @@
 # 🛒 Smart Cart Supermarket — Dashboard Administrateur
 **PFE — Système de Chariots Intelligents**
 
-description:Smart Cart Dashboard est une interface d'administration développée dans le cadre d'un projet de fin d'études. Elle permet de gérer les chariots intelligents, les produits, les sessions d'achat, les notifications et les statistiques en temps réel.
+Description: Smart Cart Dashboard est une interface d'administration développée dans le cadre d'un projet de fin d'études. Elle permet de gérer les chariots intelligents, les produits, les sessions d'achat, les notifications et les statistiques en temps réel.
 
 ## 🚀 Technologies
 
@@ -22,28 +22,28 @@ description:Smart Cart Dashboard est une interface d'administration développée
 smartcart/
 ├── backend/
 │   ├── config/
-│   │   ├── db.js           → Connexion MySQL
+│   │   ├── db.js           → Connexion Mongo
 │   │   └── database.sql    → Schéma + données démo
 │   ├── middleware/
 │   │   └── auth.js         → Authentification JWT
 │   ├── routes/
-│   │   ├── auth.js         → POST /api/auth/login
-│   │   ├── dashboard.js    → GET  /api/dashboard/stats
-│   │   ├── chariots.js     → CRUD /api/chariots
-│   │   ├── sessions.js     → GET  /api/sessions
-│   │   ├── produits.js     → CRUD /api/produits
-│   │   ├── notifications.js→ GET  /api/notifications
-│   │   └── statistiques.js → GET  /api/statistiques
-│   ├── .env                → Variables d'environnement
+│   │   ├── auth.js         
+│   │   ├── dashboard.js    
+│   │   ├── chariots.js     
+│   │   ├── sessions.js     
+│   │   ├── produits.js    
+│   │   ├── notifications.js
+│   │   └── statistiques.js 
+│   ├── .env                
 │   ├── package.json
-│   └── server.js           → Point d'entrée Express
+│   └── server.js           
 │
 └── frontend/
     ├── css/
-    │   └── style.css       → Styles globaux
+    │   └── style.css       
     ├── js/
-    │   ├── api.js          → Helper API + utils
-    │   └── layout.js       → Sidebar + topbar partagés
+    │   ├── api.js          
+    │   └── layout.js       
     └── pages/
         ├── login.html          → Page connexion
         ├── dashboard.html      → Tableau de bord
@@ -94,9 +94,7 @@ Des comptes de démonstration peuvent être créés via la base de données four
 ## 📊 Dashboard
 ## 🛒 Gestion des Produits
 ## 📈 Statistiques
-
 ## 🚗 Gestion des Chariots
 
-![Chariots](screenshots/chariots.png)
 
 *© 2026 Projet d'Ingénierie Smart Cart — PFE*
