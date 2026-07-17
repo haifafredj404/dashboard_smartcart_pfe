@@ -91,28 +91,9 @@ Des comptes de démonstration peuvent être créés via la base de données four
 # 📷 Captures d'écran
 
 ## 🔐 Login
-
-![Login](screenshots/login.png)
-
----
-
 ## 📊 Dashboard
-
-![Dashboard](screenshots/dashboard.png)
-
----
-
 ## 🛒 Gestion des Produits
-
-![Produits](screenshots/produits.png)
-
----
-
 ## 📈 Statistiques
-
-![Statistiques](screenshots/statistiques.png)
-
----
 
 ## 🚗 Gestion des Chariots
 
