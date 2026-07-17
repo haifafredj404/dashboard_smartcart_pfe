@@ -61,40 +61,24 @@ smartcart/
 
 ### 1. Prérequis
 - Node.js 18+
-- MySQL 8.0+
 - npm
 
-### 2. Base de Données MySQL
-
-Ouvrez MySQL et exécutez :
-```sql
--- Dans MySQL Workbench ou CLI
-source /chemin/vers/smartcart/backend/config/database.sql
+### 2. Base de Données Mongo compass
 ```
 
 ### 3. Backend
 
 ```bash
-npm install
+
 ```
 
 Configurez `.env` si nécessaire :
 ```env
 Configurez votre fichier `.env` selon votre environnement.
 
-Démarrez le serveur :
-```bash
-npm run dev    # Mode développement (nodemon)
-# ou
-npm start      # Mode production
-```
-
-Le serveur sera disponible sur : http://localhost:5000
-
 ### 4. Frontend
 
 Le frontend est servi directement par Express (fichiers statiques).
-Ouvrez votre navigateur sur : **http://localhost:5000**
 
 ---
 
