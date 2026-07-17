@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Cart — Chariots Intelligents</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div id="topbar-mount"></div>
+    <main class="page-content">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" data-filter="tous"        onclick="filterChariots('tous',this)"        style="background:#1e3a8a;color:white;border-color:#1e3a8a">Tous</button>
+          <button class="btn btn-outline btn-sm" data-filter="actif"       onclick="filterChariots('actif',this)">Actifs</button>
+          <button class="btn btn-outline btn-sm" data-filter="inactif"     onclick="filterChariots('inactif',this)">Inactifs</button>
+          <button class="btn btn-outline btn-sm" data-filter="maintenance" onclick="filterChariots('maintenance',this)">Maintenance</button>
+          <button class="btn btn-outline btn-sm" data-filter="charge"      onclick="filterChariots('charge',this)">En Charge</button>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Enregistrer un Nouveau Chariot</button>
+      </div>
+
+      <div id="chariotsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+        <div class="card" style="text-align:center;padding:40px"><div class="spinner"></div></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="logout-mount"></div>
+
+<!-- Modal Ajouter -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal" style="max-width:480px;text-align:left">
+    <h3 style="margin-bottom:20px;font-size:1.1rem">Enregistrer un Nouveau Chariot</h3>
+    <div class="form-group">
+      <label>Code Chariot (ex: SC-050)</label>
+      <input type="text" class="form-control" id="newCode" placeholder="SC-0XX">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Statut</label>
+        <select class="form-control" id="newStatut">
+          <option value="inactif">Inactif</option>
+          <option value="actif">Actif</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="charge">En Charge</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Niveau Batterie (%)</label>
+        <input type="number" class="form-control" id="newBatterie" value="100" min="0" max="100">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Force du Signal</label>
+      <select class="form-control" id="newSignal">
+        <option value="excellent">Excellent</option>
+        <option value="bon">Bon</option>
+        <option value="faible">Faible</option>
+        <option value="aucun">Aucun</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea class="form-control" id="newNotes" rows="2" placeholder="Notes optionnelles..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-outline" onclick="closeAddModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitAddChariot()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Détails -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="max-width:500px;text-align:left;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h3 id="detailTitle">Détails du Chariot</h3>
+      <button onclick="closeDetailModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#94a3b8">✕</button>
+    </div>
+    <div id="detailContent"><div class="spinner"></div></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px" id="detailBtns"></div>
+  </div>
+</div>
+
+<!-- Modal Modifier -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:480px;text-align:left">
+    <h3 style="margin-bottom:20px;font-size:1.1rem">Modifier le Chariot</h3>
+    <input type="hidden" id="editId">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Statut</label>
+        <select class="form-control" id="editStatut">
+          <option value="actif">Actif</option>
+          <option value="inactif">Inactif</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="charge">En Charge</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Niveau Batterie (%)</label>
+        <input type="number" class="form-control" id="editBatterie" min="0" max="100">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Force du Signal</label>
+      <select class="form-control" id="editSignal">
+        <option value="excellent">Excellent</option>
+        <option value="bon">Bon</option>
+        <option value="faible">Faible</option>
+        <option value="aucun">Aucun</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea class="form-control" id="editNotes" rows="2"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-outline" onclick="closeEditModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitEditChariot()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Supprimer -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon danger">🗑️</div>
+    <h3>Supprimer le Chariot</h3>
+    <p id="deleteMsg">Êtes-vous sûr ?</p>
+    <input type="hidden" id="deleteId">
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="confirmDelete()">Oui, supprimer</button>
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+initLayout('chariots', 'Chariots Intelligents');
+
+var currentFilter = 'tous';
+
+var statutConfig = {
+  actif:       { label:'ACTIF',       badge:'badge-success' },
+  inactif:     { label:'INACTIF',     badge:'badge-gray' },
+  maintenance: { label:'MAINTENANCE', badge:'badge-warning' },
+  charge:      { label:'EN CHARGE',   badge:'badge-info' }
+};
+
+function batteryClass(n) {
+  if (n >= 50) return 'high';
+  if (n >= 20) return 'medium';
+  return 'low';
+}
+
+function signalLabel(s) {
+  if (s === 'excellent') return 'Excellent';
+  if (s === 'bon')       return 'Bon';
+  if (s === 'faible')    return 'Faible';
+  return 'Aucun';
+}
+
+function renderCard(c) {
+  var sc = statutConfig[c.statut] || statutConfig.inactif;
+  var bc = batteryClass(c.niveau_batterie);
+  var iconColor = c.statut === 'actif' ? '#2563eb' : '#94a3b8';
+
+  return '<div class="card" style="transition:box-shadow 0.2s" onmouseenter="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.1)\'" onmouseleave="this.style.boxShadow=\'\'">' +
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">' +
+      '<div style="display:flex;align-items:center;gap:12px">' +
+        '<div style="width:44px;height:44px;background:#eff6ff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:' + iconColor + '">🛒</div>' +
+        '<div>' +
+          '<div style="font-size:1.05rem;font-weight:700">' + c.code + '</div>' +
+          '<span class="badge ' + sc.badge + '" style="margin-top:3px">' + sc.label + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;font-size:0.84rem;margin-bottom:16px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<span style="color:#64748b">🔋 Niveau de Batterie</span>' +
+        '<strong>' + c.niveau_batterie + '%</strong>' +
+      '</div>' +
+      '<div class="battery-bar"><div class="battery-fill ' + bc + '" style="width:' + c.niveau_batterie + '%"></div></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<span style="color:#64748b">📶 Force du Signal</span>' +
+        '<strong>' + signalLabel(c.force_signal) + '</strong>' +
+      '</div>' +
+    '</div>' +
+    '<button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" onclick="ouvrirDetails(\'' + c._id + '\')">Détails</button>' +
+  '</div>';
+}
+
+async function loadChariots(filter) {
+  if (!filter) filter = 'tous';
+  var grid  = document.getElementById('chariotsGrid');
+  var param = filter !== 'tous' ? '?statut=' + filter : '';
+  var data  = await api.get('/chariots' + param);
+
+  if (!data || !data.success) {
+    grid.innerHTML = '<div class="card" style="text-align:center;color:#94a3b8;padding:40px">Erreur de chargement</div>';
+    return;
+  }
+
+  if (data.data.length === 0) {
+    grid.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;padding:48px;color:#94a3b8">' +
+      '<div style="font-size:2rem;margin-bottom:12px">🛒</div>' +
+      '<div style="font-weight:600;margin-bottom:12px">Aucun chariot trouvé</div>' +
+      '<button class="btn btn-primary" onclick="openAddModal()">+ Ajouter le premier chariot</button>' +
+    '</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < data.data.length; i++) {
+    html += renderCard(data.data[i]);
+  }
+  html += '<div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed #e2e8f0;background:transparent;box-shadow:none;cursor:pointer;min-height:180px;gap:8px;color:#94a3b8" onclick="openAddModal()" onmouseenter="this.style.borderColor=\'#2563eb\';this.style.color=\'#2563eb\'" onmouseleave="this.style.borderColor=\'#e2e8f0\';this.style.color=\'#94a3b8\'">' +
+    '<span style="font-size:1.8rem">+</span>' +
+    '<span style="font-size:0.84rem;font-weight:600">Enregistrer un Nouveau Chariot</span>' +
+  '</div>';
+  grid.innerHTML = html;
+}
+
+function filterChariots(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('[data-filter]').forEach(function(b) {
+    b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+  });
+  btn.style.background  = '#1e3a8a';
+  btn.style.color       = 'white';
+  btn.style.borderColor = '#1e3a8a';
+  loadChariots(filter);
+}
+
+function openAddModal()  { document.getElementById('addModal').classList.add('show'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+
+async function submitAddChariot() {
+  var code = document.getElementById('newCode').value.trim().toUpperCase();
+  if (!code) { showToast('Code chariot requis', 'error'); return; }
+  var body = {
+    code:            code,
+    statut:          document.getElementById('newStatut').value,
+    niveau_batterie: parseInt(document.getElementById('newBatterie').value),
+    force_signal:    document.getElementById('newSignal').value,
+    notes:           document.getElementById('newNotes').value
+  };
+  var res = await api.post('/chariots', body);
+  if (res && res.success) {
+    showToast(res.message);
+    closeAddModal();
+    document.getElementById('newCode').value = '';
+    loadChariots(currentFilter);
+  } else {
+    showToast((res && res.message) ? res.message : 'Erreur', 'error');
+  }
+}
+
+async function ouvrirDetails(id) {
+  document.getElementById('detailModal').classList.add('show');
+  document.getElementById('detailTitle').textContent = 'Détails du Chariot';
+  document.getElementById('detailContent').innerHTML = '<div class="spinner"></div>';
+  document.getElementById('detailBtns').innerHTML    = '';
+
+  var data = await api.get('/chariots/' + id);
+  if (!data || !data.success) {
+    document.getElementById('detailContent').innerHTML = '<p style="color:#94a3b8;text-align:center">Erreur de chargement</p>';
+    return;
+  }
+
+  var c  = data.data;
+  var sc = statutConfig[c.statut] || statutConfig.inactif;
+  var bc = batteryClass(c.niveau_batterie);
+  document.getElementById('detailTitle').textContent = 'Chariot ' + c.code;
+
+  var html = '';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">';
+  html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center"><span class="badge ' + sc.badge + '">' + sc.label + '</span><div style="font-size:0.72rem;color:#64748b;margin-top:4px">Statut</div></div>';
+  html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#1e3a8a">' + c.niveau_batterie + '%</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">Batterie</div></div>';
+  html += '</div>';
+  html += '<div class="battery-bar" style="margin-bottom:16px"><div class="battery-fill ' + bc + '" style="width:' + c.niveau_batterie + '%"></div></div>';
+  html += '<div style="display:flex;flex-direction:column;gap:10px;font-size:0.86rem;margin-bottom:20px">';
+  html += '<div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px"><span style="color:#64748b">📶 Force du Signal</span><strong>' + signalLabel(c.force_signal) + '</strong></div>';
+  html += '<div style="display:flex;justify-content:space-between;padding:10px;background:#f8fafc;border-radius:8px"><span style="color:#64748b">⚙️ Firmware</span><strong>' + (c.firmware_version || '1.0.0') + '</strong></div>';
+  html += '</div>';
+
+  if (c.notes) {
+    html += '<div style="background:#fef9c3;border-radius:8px;padding:12px;font-size:0.83rem;margin-bottom:16px"><strong>📝 Notes :</strong> ' + c.notes + '</div>';
+  }
+
+  if (c.sessions && c.sessions.length > 0) {
+    html += '<div style="font-weight:700;font-size:0.85rem;margin-bottom:10px">Dernières Sessions</div>';
+    for (var i = 0; i < c.sessions.length; i++) {
+      var s = c.sessions[i];
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:0.82rem">';
+      html += '<span>' + (s.client_nom || 'Inconnu') + '</span>';
+      html += '<span style="font-weight:600;color:#1e3a8a">' + formatCurrency(s.montant_total) + '</span>';
+      html += '<span class="badge ' + (s.statut === 'terminee' ? 'badge-success' : 'badge-info') + '">' + s.statut + '</span>';
+      html += '</div>';
+    }
+  }
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailBtns').innerHTML =
+  '<button class="btn btn-outline" onclick="closeDetailModal()">Fermer</button>' +
+
+  '<button class="btn btn-primary" onclick="ouvrirEdit(\'' + c._id + '\',\'' + c.statut + '\',' + c.niveau_batterie + ',\'' + c.force_signal + '\',\'' + (c.notes || '') + '\')">✏️ Modifier</button>' +
+  '<button class="btn btn-sm" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca" onclick="ouvrirDelete(\'' + c._id + '\',\'' + c.code + '\')">🗑️ Supprimer</button>';
+}
+function closeDetailModal() { document.getElementById('detailModal').classList.remove('show'); }
+
+function ouvrirEdit(id, statut, batterie, signal, notes) {
+  document.getElementById('editId').value       = id;
+  document.getElementById('editStatut').value   = statut;
+  document.getElementById('editBatterie').value = batterie;
+  document.getElementById('editSignal').value   = signal;
+  document.getElementById('editNotes').value    = notes;
+  closeDetailModal();
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('show'); }
+
+async function submitEditChariot() {
+  var id   = document.getElementById('editId').value;
+  var body = {
+    statut:           document.getElementById('editStatut').value,
+    niveau_batterie:  parseInt(document.getElementById('editBatterie').value),
+    force_signal:     document.getElementById('editSignal').value,
+    firmware_version: '1.0.0',
+    notes:            document.getElementById('editNotes').value
+  };
+  var res = await api.put('/chariots/' + id, body);
+  if (res && res.success) {
+    showToast('Chariot mis à jour ✓');
+    closeEditModal();
+    loadChariots(currentFilter);
+  } else {
+    showToast((res && res.message) ? res.message : 'Erreur serveur', 'error');
+  }
+}
+
+function ouvrirDelete(id, code) {
+  document.getElementById('deleteId').value        = id;
+  document.getElementById('deleteMsg').textContent = 'Supprimer le chariot ' + code + ' ?';
+  closeDetailModal();
+  document.getElementById('deleteModal').classList.add('show');
+}
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+
+async function confirmDelete() {
+  var id  = document.getElementById('deleteId').value;
+  var res = await api.delete('/chariots/' + id);
+  if (res && res.success) {
+    showToast(res.message);
+    closeDeleteModal();
+    loadChariots(currentFilter);
+  } else {
+    showToast((res && res.message) ? res.message : 'Erreur', 'error');
+  }
+}
+
+loadChariots();
+</script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Cart — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary:#1e3a8a; --primary-dark:#162d6e; --accent:#2563eb;
+  --text:#1e293b; --text-muted:#64748b; --border:#e2e8f0;
+  --bg:#f1f5f9; --white:#fff; --danger:#ef4444;
+  --font:'Plus Jakarta Sans',sans-serif;
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-wrapper { width:100%; max-width:440px; padding:20px; }
+.login-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+}
+.login-header {
+  background: var(--primary);
+  padding: 32px 32px 28px;
+  text-align: center;
+}
+.login-logo {
+  width:60px; height:60px;
+  background: white;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 14px;
+}
+.login-header h1 { font-size:1.35rem; font-weight:700; color:white; margin-bottom:4px; }
+.login-header p  { font-size:0.82rem; color:rgba(255,255,255,0.65); }
+.login-body { padding:28px 32px 24px; }
+.form-group { margin-bottom:18px; }
+.form-group label { display:block; font-size:0.84rem; font-weight:600; color:var(--text); margin-bottom:7px; }
+.form-control {
+  width:100%; padding:12px 14px;
+  border:1.5px solid var(--border);
+  border-radius:9px; font-size:0.9rem;
+  font-family:var(--font); color:var(--text);
+  background:white; transition:border 0.18s, box-shadow 0.18s;
+}
+.form-control:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+.btn-login {
+  width:100%; padding:13px;
+  background:var(--primary); color:white;
+  border:none; border-radius:9px;
+  font-size:0.95rem; font-weight:700;
+  font-family:var(--font); cursor:pointer;
+  margin-top:6px; transition: background 0.18s, transform 0.1s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-login:hover  { background:var(--primary-dark); }
+.btn-login:active { transform:scale(0.99); }
+.btn-login.loading { pointer-events:none; opacity:0.8; }
+.forgot-link {
+  text-align:center; margin-top:14px;
+  font-size:0.84rem; color:var(--accent);
+  font-weight:500; cursor:pointer; text-decoration:none; display:block;
+}
+.forgot-link:hover { color:var(--primary); text-decoration:underline; }
+.login-footer {
+  text-align:center; padding:16px 32px;
+  border-top:1px solid var(--border);
+  font-size:0.75rem; color:var(--text-muted);
+}
+.error-msg {
+  background:#fef2f2; border:1px solid #fecaca;
+  color:var(--danger); padding:10px 14px;
+  border-radius:8px; font-size:0.83rem;
+  margin-bottom:16px; display:none;
+}
+.success-msg {
+  background:#f0fdf4; border:1px solid #bbf7d0;
+  color:#16a34a; padding:10px 14px;
+  border-radius:8px; font-size:0.83rem;
+  margin-bottom:16px; display:none;
+}
+.spinner {
+  width:18px; height:18px;
+  border:2px solid rgba(255,255,255,0.4);
+  border-top-color:white; border-radius:50%;
+  animation:spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.demo-hint {
+  background:var(--bg); border:1px dashed var(--border);
+  border-radius:8px; padding:10px 14px;
+  font-size:0.78rem; color:var(--text-muted);
+  margin-bottom:16px; line-height:1.5;
+}
+.demo-hint strong { color:var(--text); }
+</style>
+</head>
+<body>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">🛒</div>
+      <h1 id="cardTitle">Système Smart Cart</h1>
+      <p id="cardSubtitle">Accès au Portail Administrateur</p>
+    </div>
+    <div class="login-body">
+
+      <!-- ── Formulaire Connexion ── -->
+      <div id="formLogin">
+        <div class="demo-hint"><strong>Démo :</strong> admin@smartcart.tn / admin123</div>
+        <div class="error-msg" id="loginError"></div>
+        <div class="form-group">
+          <label>Adresse Email</label>
+          <input type="email" class="form-control" id="email" value="admin@smartcart.tn" placeholder="email@smartcart.tn" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div class="form-group">
+          <label>Mot de Passe</label>
+          <div style="position:relative">
+            <input type="password" class="form-control" id="password" value="admin123" placeholder="••••••••" style="padding-right:42px" onkeydown="if(event.key==='Enter')doLogin()">
+            <button onclick="togglePwd('password',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1rem">👁️</button>
+          </div>
+        </div>
+        <button class="btn-login" id="loginBtn" onclick="doLogin()">
+          Se connecter au Tableau de Bord
+        </button>
+        <a class="forgot-link" onclick="showForgot()">Mot de passe oublié ?</a>
+        <div style="text-align:center;margin-top:12px;font-size:0.84rem;color:#64748b">
+          Première utilisation ?
+          <a href="register.html" style="color:#2563eb;font-weight:600;text-decoration:none">Créer un compte →</a>
+        </div>
+      </div>
+
+      <!-- ── Formulaire Mot de passe oublié ── -->
+      <div id="formForgot" style="display:none">
+        <p style="color:#64748b;font-size:0.88rem;text-align:center;margin-bottom:20px">
+          Entrez votre email et nous vous enverrons un lien de réinitialisation.
+        </p>
+        <div class="error-msg"   id="forgotError"></div>
+        <div class="success-msg" id="forgotSuccess"></div>
+        <div class="form-group">
+          <label>Adresse Email</label>
+          <input type="email" class="form-control" id="forgotEmail" placeholder="email@smartcart.tn" onkeydown="if(event.key==='Enter')doForgot()">
+        </div>
+        <button class="btn-login" id="forgotBtn" onclick="doForgot()">
+          Envoyer le lien de réinitialisation
+        </button>
+        <a class="forgot-link" onclick="showLogin()">← Retour à la connexion</a>
+      </div>
+
+    </div>
+    <div class="login-footer">© 2026 Projet d'Ingénierie Smart Cart. Tous droits réservés.</div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+if (localStorage.getItem('sc_token')) {
+  window.location.href = '/pages/dashboard.html';
+}
+
+function togglePwd(id, btn) {
+  var inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
+}
+
+function showForgot() {
+  document.getElementById('formLogin').style.display   = 'none';
+  document.getElementById('formForgot').style.display  = 'block';
+  document.getElementById('cardTitle').textContent     = 'Mot de passe oublié';
+  document.getElementById('cardSubtitle').textContent  = 'Réinitialisation du mot de passe';
+  document.getElementById('forgotError').style.display   = 'none';
+  document.getElementById('forgotSuccess').style.display = 'none';
+  document.getElementById('forgotEmail').value = '';
+}
+
+function showLogin() {
+  document.getElementById('formForgot').style.display  = 'none';
+  document.getElementById('formLogin').style.display   = 'block';
+  document.getElementById('cardTitle').textContent     = 'Système Smart Cart';
+  document.getElementById('cardSubtitle').textContent  = 'Accès au Portail Administrateur';
+  document.getElementById('loginError').style.display  = 'none';
+}
+
+async function doLogin() {
+  var btn      = document.getElementById('loginBtn');
+  var errEl    = document.getElementById('loginError');
+  var email    = document.getElementById('email').value.trim();
+  var password = document.getElementById('password').value;
+
+  errEl.style.display = 'none';
+  if (!email || !password) {
+    errEl.textContent   = 'Veuillez remplir tous les champs.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.classList.add('loading');
+  btn.innerHTML = '<div class="spinner"></div> Connexion en cours...';
+
+  try {
+    var res  = await fetch(API + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, mot_de_passe: password })
+    });
+    var data = await res.json();
+
+    if (data.success) {
+      console.log(data);
+      localStorage.setItem('sc_token', data.token);
+      localStorage.setItem('sc_admin', JSON.stringify(data.admin));
+      window.location.href = '/pages/dashboard.html';
+    } else {
+      errEl.textContent   = data.message || 'Identifiants incorrects.';
+      errEl.style.display = 'block';
+      btn.classList.remove('loading');
+      btn.innerHTML = 'Se connecter au Tableau de Bord';
+    }
+  } catch(e) {
+    errEl.textContent   = 'Impossible de contacter le serveur.';
+    errEl.style.display = 'block';
+    btn.classList.remove('loading');
+    btn.innerHTML = 'Se connecter au Tableau de Bord';
+  }
+}
+
+async function doForgot() {
+  var btn    = document.getElementById('forgotBtn');
+  var errEl  = document.getElementById('forgotError');
+  var succEl = document.getElementById('forgotSuccess');
+  var email  = document.getElementById('forgotEmail').value.trim();
+
+  errEl.style.display  = 'none';
+  succEl.style.display = 'none';
+
+  if (!email) {
+    errEl.textContent   = 'Veuillez entrer votre adresse email.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.classList.add('loading');
+  btn.innerHTML = '<div class="spinner"></div> Envoi en cours...';
+
+  try {
+    var res  = await fetch(API + '/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    var data = await res.json();
+
+    if (data.success) {
+      succEl.textContent   = '✅ ' + data.message;
+      succEl.style.display = 'block';
+    } else {
+      errEl.textContent   = '❌ ' + (data.message || 'Erreur serveur.');
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent   = '❌ Impossible de contacter le serveur.';
+    errEl.style.display = 'block';
+  }
+
+  btn.classList.remove('loading');
+  btn.innerHTML = 'Envoyer le lien de réinitialisation';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Cart — Produits</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div id="topbar-mount"></div>
+    <main class="page-content">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div style="position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8">🔍</span>
+            <input type="text" class="form-control" id="searchProd" placeholder="Rechercher un produit..." style="padding-left:32px;width:240px" oninput="loadProduits()">
+          </div>
+          <select class="form-control" id="catFilter" style="width:auto" onchange="loadProduits()">
+            <option value="tous">Toutes catégories</option>
+            <option value="epicerie">Épicerie</option>
+            <option value="boissons">Boissons</option>
+            <option value="boucherie">Boucherie</option>
+            <option value="legumes">Légumes</option>
+            <option value="produits_laitiers">Produits Laitiers</option>
+            <option value="electronique">Électronique</option>
+            <option value="hygiene">Hygiène</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Ajouter un Produit</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>PRODUIT</th>
+              <th>CODE BARRE</th>
+              <th>CATÉGORIE</th>
+              <th>PRIX</th>
+              <th>STOCK</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="produitsBody">
+            <tr><td colspan="6" style="text-align:center;padding:24px"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="logout-mount"></div>
+
+<!-- Modal Ajouter -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal" style="max-width:480px;text-align:left">
+    <h3 style="margin-bottom:20px;font-size:1.1rem">Ajouter un Produit</h3>
+    <div class="form-group">
+      <label>Code Barre</label>
+      <input type="text" class="form-control" id="newCode" placeholder="Ex: 3012345678901">
+    </div>
+    <div class="form-group">
+      <label>Nom du Produit</label>
+      <input type="text" class="form-control" id="newNom" placeholder="Ex: Lait Viva 1L">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select class="form-control" id="newCat">
+          <option value="epicerie">Épicerie</option>
+          <option value="boissons">Boissons</option>
+          <option value="boucherie">Boucherie</option>
+          <option value="legumes">Légumes</option>
+          <option value="produits_laitiers">Produits Laitiers</option>
+          <option value="electronique">Électronique</option>
+          <option value="hygiene">Hygiène</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prix (TND)</label>
+        <input type="number" class="form-control" id="newPrix" placeholder="0.000" step="0.001">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Stock</label>
+        <input type="number" class="form-control" id="newStock" value="0">
+      </div>
+      <div class="form-group">
+        <label>Unité</label>
+        <input type="text" class="form-control" id="newUnite" value="unité">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-outline" onclick="closeAddModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitAdd()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Modifier -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="max-width:480px;text-align:left">
+    <h3 style="margin-bottom:20px;font-size:1.1rem">Modifier le Produit</h3>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label>Nom du Produit</label>
+      <input type="text" class="form-control" id="editNom">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select class="form-control" id="editCat">
+          <option value="epicerie">Épicerie</option>
+          <option value="boissons">Boissons</option>
+          <option value="boucherie">Boucherie</option>
+          <option value="legumes">Légumes</option>
+          <option value="produits_laitiers">Produits Laitiers</option>
+          <option value="electronique">Électronique</option>
+          <option value="hygiene">Hygiène</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prix (TND)</label>
+        <input type="number" class="form-control" id="editPrix" step="0.001">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Stock</label>
+        <input type="number" class="form-control" id="editStock">
+      </div>
+      <div class="form-group">
+        <label>Unité</label>
+        <input type="text" class="form-control" id="editUnite">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-outline" onclick="closeEditModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitEdit()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Supprimer -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon danger">🗑️</div>
+    <h3>Supprimer le Produit</h3>
+    <p id="deleteMsg">Êtes-vous sûr de vouloir supprimer ce produit ?</p>
+    <input type="hidden" id="deleteId">
+    <div class="modal-btns">
+      <button class="btn btn-danger" onclick="confirmDelete()">Oui, supprimer</button>
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+initLayout('produits', 'Produits');
+
+var catLabels = {
+  epicerie:'Épicerie', boissons:'Boissons', boucherie:'Boucherie',
+  legumes:'Légumes', produits_laitiers:'Produits Laitiers',
+  electronique:'Électronique', hygiene:'Hygiène', autre:'Autre'
+};
+var catBadges = {
+  epicerie:'badge-success', boissons:'badge-info', boucherie:'badge-danger',
+  legumes:'badge-success', produits_laitiers:'badge-info',
+  electronique:'badge-purple', hygiene:'badge-warning', autre:'badge-gray'
+};
+
+async function loadProduits() {
+  var tbody   = document.getElementById('produitsBody');
+  var search  = document.getElementById('searchProd').value.trim();
+  var cat     = document.getElementById('catFilter').value;
+  var endpoint = '/produits?';
+  if (cat !== 'tous') endpoint += 'categorie=' + cat + '&';
+  if (search) endpoint += 'search=' + encodeURIComponent(search);
+
+  var data = await api.get(endpoint);
+  console.log(data);
+  if (!data || !data.success) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8">Erreur de chargement</td></tr>';
+    return;
+  }
+  if (data.data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:32px">Aucun produit trouvé</td></tr>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < data.data.length; i++) {
+    var p = data.data[i];
+    var stockColor = p.stock < 10 ? '#ef4444' : p.stock < 50 ? '#f59e0b' : '#10b981';
+    html += '<tr>';
+    html += '<td><strong>' + p.nom + '</strong></td>';
+    html += '<td style="font-family:monospace;font-size:0.8rem;color:#64748b">' + p.code_barre + '</td>';
+    html += '<td><span class="badge ' + (catBadges[p.categorie] || 'badge-gray') + '">' + (catLabels[p.categorie] || p.categorie) + '</span></td>';
+    html += '<td style="font-weight:600">' + formatCurrency(p.prix) + '</td>';
+    html += '<td><span style="color:' + stockColor + ';font-weight:600">' + p.stock + '</span> <span style="color:#94a3b8;font-size:0.78rem">' + p.unite + '</span></td>';
+    html += '<td><div style="display:flex;gap:6px">';
+    html += '<button class="btn btn-outline btn-sm" onclick="openEditModal(' + p._id + ',\'' + p.nom.replace(/'/g,"\\'") + '\',\'' + p.categorie + '\',' + p.prix + ',' + p.stock + ',\'' + p.unite + '\')">✏️ Modifier</button>';
+    html += '<button class="btn btn-sm" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca" onclick="openDeleteModal(' + p._id + ',\'' + p.nom.replace(/'/g,"\\'") + '\')">🗑️</button>';
+    html += '</div></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ── Modal Ajouter ──
+function openAddModal()  { document.getElementById('addModal').classList.add('show'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+
+async function submitAdd() {
+  var body = {
+    code_barre: document.getElementById('newCode').value.trim(),
+    nom:        document.getElementById('newNom').value.trim(),
+    categorie:  document.getElementById('newCat').value,
+    prix:       parseFloat(document.getElementById('newPrix').value),
+    stock:      parseInt(document.getElementById('newStock').value),
+    unite:      document.getElementById('newUnite').value
+  };
+  if (!body.code_barre || !body.nom || !body.prix) {
+    showToast('Veuillez remplir tous les champs obligatoires', 'error'); return;
+  }
+  var res = await api.post('/produits', body);
+  if (res && res.success) {
+    showToast(res.message);
+    closeAddModal();
+    document.getElementById('newCode').value  = '';
+    document.getElementById('newNom').value   = '';
+    document.getElementById('newPrix').value  = '';
+    document.getElementById('newStock').value = '0';
+    loadProduits();
+  } else {
+    showToast((res && res.message) ? res.message : 'Erreur', 'error');
+  }
+}
+
+// ── Modal Modifier ──
+function openEditModal(id, nom, cat, prix, stock, unite) {
+  document.getElementById('editId').value    = id;
+  document.getElementById('editNom').value   = nom;
+  document.getElementById('editCat').value   = cat;
+  document.getElementById('editPrix').value  = prix;
+  document.getElementById('editStock').value = stock;
+  document.getElementById('editUnite').value = unite;
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('show'); }
+
+async function submitEdit() {
+  var id    = document.getElementById('editId').value;
+  var body  = {
+    nom:      document.getElementById('editNom').value.trim(),
+    categorie:document.getElementById('editCat').value,
+    prix:     parseFloat(document.getElementById('editPrix').value),
+    stock:    parseInt(document.getElementById('editStock').value),
+    unite:    document.getElementById('editUnite').value
+  };
+  var res = await api.put('/produits/' + id, body);
+  if (res && res.success) {
+    showToast('Produit mis à jour ✓');
+    closeEditModal();
+    loadProduits();
+  } else {
+    showToast((res && res.message) ? res.message : 'Erreur serveur', 'error');
+  }
+}
+
+// ── Modal Supprimer ──
+function openDeleteModal(id, nom) {
+  document.getElementById('deleteId').value = id;
+  document.getElementById('deleteMsg').textContent = 'Supprimer "' + nom + '" ?';
+  document.getElementById('deleteModal').classList.add('show');
+}
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+
+async function confirmDelete() {
+  var id  = document.getElementById('deleteId').value;
+  var res = await api.delete('/produits/' + id);
+  if (res && res.success) {
+    showToast(res.message);
+    closeDeleteModal();
+    loadProduits();
+  } else {
+    showToast((res && res.message) ? res.message : 'Erreur', 'error');
+  }
+}
+
+loadProduits();
+</script>
+</body>
+</html>

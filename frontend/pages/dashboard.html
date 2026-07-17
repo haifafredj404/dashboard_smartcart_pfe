@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Cart — Tableau de Bord</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div id="topbar-mount"></div>
+    <main class="page-content">
+
+      <!-- KPI Cards -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card" onclick="window.location.href='statistiques.html'" style="cursor:pointer;transition:transform 0.15s,box-shadow 0.15s" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+          <div class="stat-info">
+            <h3>Ventes Quotidiennes</h3>
+            <div class="stat-value" id="statVentes">—</div>
+            <div class="stat-change up" id="statVariation">
+              <span>↗</span> <span id="varPct">—</span>
+              <span class="change-label">vs semaine dernière</span>
+            </div>
+          </div>
+          <div class="stat-icon blue">📊</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='chariots.html'" style="cursor:pointer;transition:transform 0.15s,box-shadow 0.15s" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+          <div class="stat-info">
+            <h3>Chariots Actifs</h3>
+            <div class="stat-value" id="statChariots">—</div>
+            <div class="stat-change up" id="statChariotsChange">
+              <span>↗</span> <span>+3</span>
+              <span class="change-label">vs semaine</span>
+            </div>
+          </div>
+          <div class="stat-icon green">🛒</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='sessions.html'" style="cursor:pointer;transition:transform 0.15s,box-shadow 0.15s" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+          <div class="stat-info">
+            <h3>Articles Scannés</h3>
+            <div class="stat-value" id="statArticles">—</div>
+            <div class="stat-change down">
+              <span>↘</span> <span>-5%</span>
+              <span class="change-label">vs semaine</span>
+            </div>
+          </div>
+          <div class="stat-icon purple">📦</div>
+        </div>
+        <div class="stat-card" onclick="window.location.href='notifications.html'" style="cursor:pointer;transition:transform 0.15s,box-shadow 0.15s" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+          <div class="stat-info">
+            <h3>Alertes Système</h3>
+            <div class="stat-value" id="statAlertes">—</div>
+            <div class="stat-change down" id="statAlertesLabel">
+              <span>⚠</span> <span id="alerteLabel">Critique</span>
+            </div>
+          </div>
+          <div class="stat-icon red">⚠️</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:20px">
+        <div class="card">
+          <div class="section-header">
+            <h2>Évolution Hebdomadaire des Ventes</h2>
+            <select id="chartPeriod" class="form-control" style="width:auto;padding:5px 10px;font-size:0.8rem">
+              <option value="7">7 Derniers Jours</option>
+              <option value="14">14 Derniers Jours</option>
+            </select>
+          </div>
+          <canvas id="salesChart" height="200"></canvas>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <h2>Distribution par Catégorie</h2>
+          </div>
+          <canvas id="catChart" height="200"></canvas>
+          <div id="catLegend" style="margin-top:12px;font-size:0.79rem"></div>
+        </div>
+      </div>
+
+      <!-- Activity Table -->
+      <div class="card">
+        <div class="section-header">
+          <h2>Activité Récente</h2>
+          <span class="see-all" onclick="window.location.href='sessions.html'" style="cursor:pointer;color:#2563eb;font-size:0.82rem">Tout Voir</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>UTILISATEUR</th>
+              <th>ID CHARIOT</th>
+              <th>ACTION</th>
+              <th>MONTANT</th>
+              <th>STATUT</th>
+            </tr>
+          </thead>
+          <tbody id="activityBody">
+            <tr><td colspan="5" style="text-align:center;padding:24px"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="logout-mount"></div>
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+initLayout('dashboard', 'Tableau De Bord');
+
+var salesChartInst, catChartInst;
+
+async function loadDashboard() {
+  var data = await api.get('/dashboard');
+  if (!data || !data.success) return;
+  var d = data.data;
+  console.log(d);
+
+  console.log("VENTES =", d.ventes_quotidiennes);
+  document.getElementById('statVentes').textContent = d.ventes_quotidiennes + ' DT';
+  console.log("Chariots =", d.chariots_actifs);
+  document.getElementById('statChariots').textContent = d.chariots_actifs;
+  console.log("Articles =", d.articles_scannes);
+  document.getElementById('statArticles').textContent = d.articles_scannes;
+  console.log("ALERTES =", d.alertes_systeme);
+  document.getElementById('statAlertes').textContent =d.alertes_systeme;
+
+  var pct   = parseFloat(d.variation_ventes);
+  var varEl = document.getElementById('statVariation');
+  document.getElementById('varPct').textContent = (pct > 0 ? '+' : '') + pct + '%';
+  varEl.className = 'stat-change ' + (pct >= 0 ? 'up' : 'down');
+  varEl.querySelector('span').textContent = pct >= 0 ? '↗' : '↘';
+}
+
+async function loadSalesChart() {
+  var data = await api.get('/dashboard/ventes-semaine');
+  if (!data || !data.success) return;
+
+  var labels = data.data.map(function(r) {
+    var d = new Date(r.date_vente);
+    return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric' });
+  });
+  var values = data.data.map(function(r) { return parseFloat(r.montant_total); });
+
+  if (salesChartInst) salesChartInst.destroy();
+  salesChartInst = new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        borderColor: '#1e3a8a',
+        backgroundColor: 'rgba(30,58,138,0.07)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#1e3a8a',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) { return formatCurrency(ctx.raw); } } }
+      },
+      scales: {
+        y: { grid: { color:'#f1f5f9' }, ticks: { callback: function(v) { return v.toLocaleString(); } } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+async function loadCatChart() {
+  var data = await api.get('/dashboard/distribution-categories');
+  if (!data || !data.success) return;
+
+  var colors = ['#1e3a8a','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#dbeafe'];
+  var labels = data.data.map(function(r) { return r.label || r.categorie; });
+  var values = data.data.map(function(r) { return r.total || r.pourcentage; });
+
+  if (catChartInst) catChartInst.destroy();
+  catChartInst = new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, cutout: '60%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.label + ' : ' + ctx.raw; } } }
+      }
+    }
+  });
+
+  document.getElementById('catLegend').innerHTML = data.data.slice(0,4).map(function(r, i) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+      '<span style="display:flex;align-items:center;gap:6px">' +
+        '<span style="width:10px;height:10px;background:' + colors[i] + ';border-radius:3px;display:inline-block"></span>' +
+        (r.label || r.categorie) +
+      '</span>' +
+      '<span style="font-weight:600;color:#1e293b">' + (r.pourcentage || Math.round(r.total)) + '%</span>' +
+    '</div>';
+  }).join('');
+}
+
+async function loadActivity() {
+
+  var data = await api.get('/dashboard/activite-recente');
+  var tbody = document.getElementById('activityBody');
+
+  if (!data || !data.success) {
+
+    tbody.innerHTML =
+      '<tr><td colspan="5" style="text-align:center">Erreur chargement</td></tr>';
+
+    return;
+  }
+
+  let html = '';
+
+  data.data.forEach(r => {
+
+    html += `
+      <tr>
+        <td>${r.client_nom}</td>
+
+        <td>${r.chariot}</td>
+
+        <td>
+          ${r.statut === 'active'
+            ? 'En cours'
+            : 'Payé'}
+        </td>
+
+        <td>
+          ${r.montant_total.toFixed(3)} TND
+        </td>
+
+        <td>
+          ${
+            r.statut === 'active'
+            ? '<span class="badge badge-info">EN COURS</span>'
+            : '<span class="badge badge-success">PAYÉ</span>'
+          }
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+loadDashboard();
+loadSalesChart();
+loadCatChart();
+loadActivity();
+setInterval(function() { loadDashboard(); loadActivity(); }, 30000);
+</script>
+</body>
+</html>

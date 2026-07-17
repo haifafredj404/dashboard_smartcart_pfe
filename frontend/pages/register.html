@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Cart — Créer un Compte</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --primary:#1e3a8a; --primary-dark:#162d6e; --accent:#2563eb;
+  --text:#1e293b; --text-muted:#64748b; --border:#e2e8f0;
+  --bg:#f1f5f9; --white:#fff; --danger:#ef4444;
+  --success:#10b981;
+  --font:'Plus Jakarta Sans',sans-serif;
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.register-wrapper {
+  width: 100%;
+  max-width: 480px;
+}
+.register-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+}
+.register-header {
+  background: var(--primary);
+  padding: 28px 32px 24px;
+  text-align: center;
+}
+.register-logo {
+  width: 55px; height: 55px;
+  background: white;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+}
+.register-header h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+.register-header p {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.65);
+}
+.register-body {
+  padding: 24px 32px 20px;
+}
+.form-group { margin-bottom: 15px; }
+.form-group label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-control {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  font-size: 0.88rem;
+  font-family: var(--font);
+  color: var(--text);
+  background: white;
+  transition: border 0.18s, box-shadow 0.18s;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.form-control.error { border-color: var(--danger); }
+.form-control.success { border-color: var(--success); }
+
+/* Email builder */
+.email-builder {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+  transition: border 0.18s, box-shadow 0.18s;
+}
+.email-builder:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.email-builder input {
+  border: none;
+  flex: 1;
+  padding: 11px 14px;
+  font-size: 0.88rem;
+  font-family: var(--font);
+  color: var(--text);
+  outline: none;
+}
+.email-suffix {
+  padding: 11px 14px 11px 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* Code secret */
+.code-input {
+  letter-spacing: 0.3em;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.password-wrap { position: relative; }
+.toggle-pwd {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.btn-register {
+  width: 100%;
+  padding: 13px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.18s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-register:hover { background: var(--primary-dark); }
+.btn-register.loading { pointer-events: none; opacity: 0.8; }
+
+.login-link {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+.login-link a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.login-link a:hover { color: var(--primary); }
+
+.register-footer {
+  text-align: center;
+  padding: 14px 32px;
+  border-top: 1px solid var(--border);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.error-msg {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--danger);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  margin-bottom: 14px;
+  display: none;
+}
+.success-msg {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: var(--success);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.strength-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.strength-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s, background 0.3s;
+  width: 0%;
+}
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Steps indicator */
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.step.active .step-num { background: var(--primary); color: white; }
+.step.active { color: var(--primary); }
+.step.done .step-num { background: var(--success); color: white; }
+.step-line { width: 30px; height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+
+<div class="register-wrapper">
+  <div class="register-card">
+    <div class="register-header">
+      <div class="register-logo">🛒</div>
+      <h1>Créer un Compte Administrateur</h1>
+      <p>Système Smart Cart — Portail Gérant</p>
+    </div>
+
+    <div class="register-body">
+      <!-- Steps -->
+      <div class="steps">
+        <div class="step active" id="step1-ind">
+          <div class="step-num">1</div>
+          <span>Code secret</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step2-ind">
+          <div class="step-num">2</div>
+          <span>Vos infos</span>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step3-ind">
+          <div class="step-num">3</div>
+          <span>Terminé</span>
+        </div>
+      </div>
+
+      <div class="error-msg"   id="errorMsg"></div>
+      <div class="success-msg" id="successMsg"></div>
+
+      <!-- STEP 1 : Code secret -->
+      <div id="formStep1">
+        <div class="form-group">
+          <label>🔑 Code Secret d'Activation</label>
+          <input type="text" class="form-control code-input" id="codeSecret"
+            placeholder="XXXX-XXXX" maxlength="9" oninput="formatCode(this)">
+          <p class="hint">Ce code vous a été fourni par l'éditeur du système.</p>
+        </div>
+        <button class="btn-register" onclick="verifyCode()">
+          Vérifier le Code
+        </button>
+      </div>
+
+      <!-- STEP 2 : Infos admin -->
+      <div id="formStep2" style="display:none">
+        <div class="form-group">
+          <label>Nom Complet du Gérant</label>
+          <input type="text" class="form-control" id="nomComplet" placeholder="Ex: Mohamed Ben Salah">
+        </div>
+
+        <div class="form-group">
+          <label>Nom du Supermarché</label>
+          <input type="text" class="form-control" id="nomSupermarche"
+            placeholder="Ex: Carrefour, Monoprix..." oninput="updateEmailSuffix()">
+        </div>
+
+        <div class="form-group">
+          <label>Adresse Email</label>
+          <div class="email-builder">
+            <input type="text" id="emailPrefix" placeholder="votrenom"
+              oninput="updateEmail()">
+            <span class="email-suffix" id="emailSuffix">@smartcart.tn</span>
+          </div>
+          <p class="hint" id="emailPreview" style="color:#2563eb;font-weight:500"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Mot de Passe</label>
+          <div class="password-wrap">
+            <input type="password" class="form-control" id="password"
+              placeholder="Minimum 6 caractères" oninput="checkStrength()">
+            <button class="toggle-pwd" onclick="togglePwd('password')">👁️</button>
+          </div>
+          <div class="strength-bar">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+          <p class="hint" id="strengthLabel"></p>
+        </div>
+
+        <div class="form-group">
+          <label>Confirmer le Mot de Passe</label>
+          <div class="password-wrap">
+            <input type="password" class="form-control" id="password2"
+              placeholder="Répétez le mot de passe">
+            <button class="toggle-pwd" onclick="togglePwd('password2')">👁️</button>
+          </div>
+        </div>
+
+        <button class="btn-register" id="registerBtn" onclick="doRegister()">
+          Créer mon Compte
+        </button>
+      </div>
+
+      <div class="login-link">
+        Déjà un compte ? <a href="login.html">Se connecter</a>
+      </div>
+    </div>
+
+    <div class="register-footer">
+      © 2026 Projet d'Ingénierie Smart Cart. Tous droits réservés.
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+// Code secret valide (tu peux le changer ici)
+const VALID_CODE = 'CART-2026';
+
+// Si déjà connectér
+if (localStorage.getItem('sc_token')) {
+  window.location.href = 'dashboard.html';
+}
+
+// Format code automatique XXXX-XXXX
+function formatCode(input) {
+  let val = input.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (val.length > 4) val = val.slice(0,4) + '-' + val.slice(4,8);
+  input.value = val;
+}
+
+function verifyCode() {
+  const code = document.getElementById('codeSecret').value.trim().toUpperCase();
+  const err  = document.getElementById('errorMsg');
+
+  if (!code) {
+    showError('Veuillez entrer le code secret.');
+    return;
+  }
+
+  if (code !== VALID_CODE) {
+    showError('Code secret incorrect. Contactez l\'éditeur du système.');
+    document.getElementById('codeSecret').classList.add('error');
+    return;
+  }
+
+  // Code OK → passer à l'étape 2
+  document.getElementById('formStep1').style.display = 'none';
+  document.getElementById('formStep2').style.display = 'block';
+  err.style.display = 'none';
+
+  // Update steps
+  document.getElementById('step1-ind').classList.remove('active');
+  document.getElementById('step1-ind').classList.add('done');
+  document.getElementById('step1-ind').querySelector('.step-num').textContent = '✓';
+  document.getElementById('step2-ind').classList.add('active');
+}
+
+function updateEmailSuffix() {
+  const nom = document.getElementById('nomSupermarche').value.trim()
+    .toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+  const suffix = nom ? `@${nom}.tn` : '@smartcart.tn';
+  document.getElementById('emailSuffix').textContent = suffix;
+  updateEmail();
+}
+
+function updateEmail() {
+  const prefix = document.getElementById('emailPrefix').value.trim().toLowerCase();
+  const suffix = document.getElementById('emailSuffix').textContent;
+  const preview = document.getElementById('emailPreview');
+  if (prefix) {
+    preview.textContent = `→ ${prefix}${suffix}`;
+  } else {
+    preview.textContent = '';
+  }
+}
+
+function checkStrength() {
+  const pwd = document.getElementById('password').value;
+  const fill  = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+
+  let score = 0;
+  if (pwd.length >= 6)  score++;
+  if (pwd.length >= 10) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  const levels = [
+    { w:'0%',   c:'#ef4444', l:'' },
+    { w:'25%',  c:'#ef4444', l:'Trop court' },
+    { w:'50%',  c:'#f59e0b', l:'Faible' },
+    { w:'75%',  c:'#3b82f6', l:'Moyen' },
+    { w:'90%',  c:'#10b981', l:'Fort' },
+    { w:'100%', c:'#10b981', l:'Très fort ✓' },
+  ];
+  fill.style.width      = levels[score].w;
+  fill.style.background = levels[score].c;
+  label.textContent     = levels[score].l;
+  label.style.color     = levels[score].c;
+}
+
+function togglePwd(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function showError(msg) {
+  const err = document.getElementById('errorMsg');
+  err.textContent = msg;
+  err.style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+}
+
+async function doRegister() {
+  const btn    = document.getElementById('registerBtn');
+  const nom    = document.getElementById('nomComplet').value.trim();
+  const supermarche = document.getElementById('nomSupermarche').value.trim();
+  const prefix = document.getElementById('emailPrefix').value.trim().toLowerCase();
+  const suffix = document.getElementById('emailSuffix').textContent;
+  const email  = prefix + suffix;
+  const pwd    = document.getElementById('password').value;
+  const pwd2   = document.getElementById('password2').value;
+
+  if (!nom || !prefix || !pwd) {
+    showError('Veuillez remplir tous les champs.');
+    return;
+  }
+  if (pwd.length < 6) {
+    showError('Le mot de passe doit contenir au moins 6 caractères.');
+    return;
+  }
+  if (pwd !== pwd2) {
+    showError('Les mots de passe ne correspondent pas.');
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.innerHTML = '<div class="spinner"></div> Création en cours...';
+  document.getElementById('errorMsg').style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom_complet:    nom,
+        email:          email,
+        mot_de_passe:   pwd,
+        supermarche:    supermarche
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Step 3 — succès
+      document.getElementById('formStep2').style.display = 'none';
+      document.getElementById('step2-ind').classList.remove('active');
+      document.getElementById('step2-ind').classList.add('done');
+      document.getElementById('step2-ind').querySelector('.step-num').textContent = '✓';
+      document.getElementById('step3-ind').classList.add('active');
+
+      const successMsg = document.getElementById('successMsg');
+      successMsg.innerHTML = `
+        ✅ Compte créé avec succès !<br>
+        <strong>${nom}</strong> — <span style="font-family:monospace">${email}</span><br>
+        <span style="font-size:0.8rem">Redirection vers la connexion dans 3 secondes...</span>
+      `;
+      successMsg.style.display = 'block';
+
+      setTimeout(() => {
+        window.location.href = `login.html?email=${encodeURIComponent(email)}`;
+      }, 3000);
+    } else {
+      showError(data.message || 'Erreur lors de la création du compte.');
+      btn.classList.remove('loading');
+      btn.innerHTML = 'Créer mon Compte';
+    }
+  } catch(e) {
+    showError('Impossible de contacter le serveur.');
+    btn.classList.remove('loading');
+    btn.innerHTML = 'Créer mon Compte';
+  }
+}
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('formStep1').style.display !== 'none') verifyCode();
+    else doRegister();
+  }
+});
+</script>
+</body>
+</html>

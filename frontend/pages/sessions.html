@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Cart — Sessions</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <div id="sidebar-mount"></div>
+  <div class="main-content">
+    <div id="topbar-mount"></div>
+    <main class="page-content">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" id="btn-tous"       onclick="filterSessions('tous',this)"       style="background:#1e3a8a;color:white;border-color:#1e3a8a">Toutes</button>
+          <button class="btn btn-outline btn-sm" id="btn-active"     onclick="filterSessions('active',this)">Actives</button>
+          <button class="btn btn-outline btn-sm" id="btn-terminee"   onclick="filterSessions('terminee',this)">Terminées</button>
+          <button class="btn btn-outline btn-sm" id="btn-abandonnee" onclick="filterSessions('abandonnee',this)">Abandonnées</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="live-badge"><div class="live-dot"></div> Mise à jour en direct</div>
+          <span id="totalCount" style="font-size:0.82rem;color:#64748b"></span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#1e3a8a" id="countTotal">—</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:4px">Total Sessions</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#10b981" id="countActive">—</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:4px">Actives</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#2563eb" id="countTerminee">—</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:4px">Terminées</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:1.4rem;font-weight:700;color:#1e3a8a" id="totalMontant">—</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:4px">Montant Total</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <h2>Historique Complet des Sessions</h2>
+          <input type="text" class="form-control" id="searchSession" placeholder="🔍 Rechercher client ou chariot..." style="width:260px;font-size:0.82rem;padding:7px 12px" oninput="filterBySearch()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>CLIENT</th>
+              <th>CHARIOT</th>
+              <th>DÉBUT</th>
+              <th>FIN</th>
+              <th>DURÉE</th>
+              <th>ARTICLES</th>
+              <th>MONTANT</th>
+              <th>STATUT</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="sessionsBody">
+            <tr><td colspan="10" style="text-align:center;padding:30px"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 0;flex-wrap:wrap;gap:8px">
+          <span style="font-size:0.8rem;color:#64748b" id="paginationInfo"></span>
+          <div style="display:flex;gap:6px" id="paginationBtns"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div id="logout-mount"></div>
+
+<div class="modal-overlay" id="panierModal">
+  <div class="modal" style="max-width:580px;text-align:left;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <h3 id="panierTitle">Détail de la Session</h3>
+        <p id="panierSubtitle" style="font-size:0.8rem;color:#64748b;margin-top:3px"></p>
+      </div>
+      <button onclick="closePanier()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#94a3b8">✕</button>
+    </div>
+    <div id="panierContent"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+<script src="../js/api.js"></script>
+<script src="../js/layout.js"></script>
+<script>
+initLayout('sessions', 'Sessions Actives');
+
+let allSessions = [];
+let currentFilter = 'tous';
+let currentPage = 1;
+const perPage = 10;
+
+const badgeMap = { active:'badge-info', terminee:'badge-success', abandonnee:'badge-gray' };
+const labelMap = { active:'ACTIVE', terminee:'TERMINÉE', abandonnee:'ABANDONNÉE' };
+
+async function loadAllSessions() {
+
+  try {
+
+    const data = await api.get('/sessions');
+
+    console.log('DATA API :', data);
+
+    if (!data || !data.success) {
+
+      console.error('Erreur chargement sessions');
+
+      return;
+    }
+
+    allSessions = data.data || [];
+
+    console.log('SESSIONS :', allSessions);
+
+    updateStats();
+    renderTable();
+
+  } catch (err) {
+
+    console.error('Erreur :', err);
+  }
+}
+
+function updateStats() {
+  const actives   = allSessions.filter(s => s.statut === 'active').length;
+  const terminees = allSessions.filter(s => s.statut === 'terminee').length;
+  const montant   = allSessions.reduce((sum, s) => sum + parseFloat(s.montant_total || 0), 0);
+  document.getElementById('countTotal').textContent    = allSessions.length;
+  document.getElementById('countActive').textContent   = actives;
+  document.getElementById('countTerminee').textContent = terminees;
+  document.getElementById('totalMontant').textContent  = formatCurrency(montant);
+}
+
+function getFiltered() {
+  const search = document.getElementById('searchSession').value.toLowerCase();
+  return allSessions.filter(s => {
+    const matchFilter = currentFilter === 'tous' || s.statut === currentFilter;
+    const matchSearch = !search || (s.client_nom||'').toLowerCase().includes(search) || (s.chariot_code||'').toLowerCase().includes(search);
+    return matchFilter && matchSearch;
+  });
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const total    = filtered.length;
+  const pages    = Math.ceil(total / perPage);
+  const start    = (currentPage - 1) * perPage;
+  const slice    = filtered.slice(start, start + perPage);
+
+  document.getElementById('totalCount').textContent     = total + ' session(s)';
+  document.getElementById('paginationInfo').textContent = 'Affichage ' + Math.min(start+1,total) + '–' + Math.min(start+perPage,total) + ' sur ' + total;
+
+  const tbody = document.getElementById('sessionsBody');
+
+  if (slice.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8">Aucune session trouvée</td></tr>';
+    renderPagination(0);
+    return;
+  }
+
+  let rows = '';
+  for (let i = 0; i < slice.length; i++) {
+    var s        = slice[i];
+    var initials = (s.client_nom || 'CL').split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2);
+    var debut    = new Date(s.heure_debut);
+    var fin      = s.heure_fin ? new Date(s.heure_fin) : null;
+    var duree    = fin ? Math.round((fin - debut) / 60000) + ' min' : (s.statut === 'active' ? '<span style="color:#10b981;font-weight:600">En cours</span>' : '—');
+    var debutStr = debut.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + debut.toTimeString().slice(0,5);
+    var finStr   = fin ? fin.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + fin.toTimeString().slice(0,5) : '—';
+    var clientNomSafe = (s.client_nom || 'Inconnu').replace(/'/g, "\\'");
+
+    rows += '<tr>';
+    rows += '<td style="color:#94a3b8;font-size:0.78rem">#' + (start+i+1) + '</td>';
+    rows += '<td><div style="display:flex;align-items:center;gap:9px"><div class="avatar" style="width:32px;height:32px;font-size:0.72rem">' + initials + '</div><span style="font-size:0.85rem;font-weight:500">' + (s.client_nom || 'Client Inconnu') + '</span></div></td>';
+    rows += '<td><strong style="color:#1e3a8a">' + s.chariot_code + '</strong></td>';
+    rows += '<td style="font-size:0.8rem;color:#64748b">' + debutStr + '</td>';
+    rows += '<td style="font-size:0.8rem;color:#64748b">' + finStr + '</td>';
+    rows += '<td style="font-size:0.82rem">' + duree + '</td>';
+    rows += '<td style="text-align:center;font-weight:600">' + s.nombre_articles + '</td>';
+    rows += '<td style="font-weight:700;color:#1e3a8a">' + formatCurrency(s.montant_total) + '</td>';
+    rows += '<td><span class="badge ' + badgeMap[s.statut] + '">' + labelMap[s.statut] + '</span></td>';
+    rows += '<td><div style="display:flex;gap:5px">';
+    rows += '<button class="btn btn-outline btn-sm" onclick="voirPanier(\'' + s._id + '\',\'' + s.chariot_code + '\',\'' + clientNomSafe + '\')">👁️ Voir</button>';
+    rows += '<button class="btn btn-sm" style="background:#fef2f2;color:#ef4444;border:1px solid #fecaca" onclick="supprimerSession(\'' + s._id + '\')">🗑️</button>';
+    rows += '</div></td>';
+    rows += '</tr>';
+  }
+  tbody.innerHTML = rows;
+  renderPagination(pages);
+}
+
+function renderPagination(pages) {
+  const container = document.getElementById('paginationBtns');
+  if (pages <= 1) { container.innerHTML = ''; return; }
+  let html = '';
+  for (let p = 1; p <= pages; p++) {
+    html += '<button class="btn btn-sm ' + (p === currentPage ? 'btn-primary' : 'btn-outline') + '" onclick="goPage(' + p + ')" style="min-width:34px">' + p + '</button>';
+  }
+  container.innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderTable(); }
+
+function filterSessions(filter, btn) {
+  currentFilter = filter;
+  currentPage   = 1;
+  document.querySelectorAll('[id^="btn-"]').forEach(function(b) {
+    b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+  });
+  btn.style.background  = '#1e3a8a';
+  btn.style.color       = 'white';
+  btn.style.borderColor = '#1e3a8a';
+  renderTable();
+}
+
+function filterBySearch() { currentPage = 1; renderTable(); }
+
+async function supprimerSession(id) {
+  if (!confirm('Supprimer cette session de l\'historique ?')) return;
+  const res = await api.delete('/sessions/' + id);
+  if (res && res.success) {
+    showToast('Session supprimée ✓');
+    allSessions = allSessions.filter(function(s){ return s._id !== id; });
+    updateStats();
+    renderTable();
+  } else {
+    showToast(res ? res.message : 'Erreur', 'error');
+  }
+}
+
+async function voirPanier(sessionId, code, clientNom) {
+  document.getElementById('panierModal').classList.add('show');
+  document.getElementById('panierTitle').textContent    = 'Session — ' + code;
+  document.getElementById('panierSubtitle').textContent = 'Client : ' + clientNom;
+  document.getElementById('panierContent').innerHTML    = '<div class="spinner"></div>';
+
+  const data = await api.get('/sessions/' + sessionId);
+  if (!data || !data.success) {
+    document.getElementById('panierContent').innerHTML = '<p style="color:#94a3b8;text-align:center;padding:20px">Données introuvables</p>';
+    return;
+  }
+
+  const s     = data.data;
+  const items = s.items || [];
+  let html    = '';
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">';
+  html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#1e3a8a">' + formatCurrency(s.montant_total) + '</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">Montant Total</div></div>';
+  html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center"><div style="font-size:1.1rem;font-weight:700;color:#1e3a8a">' + s.nombre_articles + '</div><div style="font-size:0.72rem;color:#64748b;margin-top:2px">Articles</div></div>';
+  html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;text-align:center"><span class="badge ' + badgeMap[s.statut] + '">' + labelMap[s.statut] + '</span><div style="font-size:0.72rem;color:#64748b;margin-top:4px">Statut</div></div>';
+  html += '</div>';
+
+  if (items.length > 0) {
+    html += '<table style="width:100%;font-size:0.84rem">';
+    html += '<thead><tr><th style="padding:8px;text-align:left;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;text-transform:uppercase">Produit</th><th style="padding:8px;text-align:center;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;text-transform:uppercase">Qté</th><th style="padding:8px;text-align:right;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;text-transform:uppercase">Prix Unit.</th><th style="padding:8px;text-align:right;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:0.7rem;text-transform:uppercase">Total</th></tr></thead>';
+    html += '<tbody>';
+    for (let j = 0; j < items.length; j++) {
+      var item = items[j];
+      html += '<tr><td style="padding:10px 8px"><div style="font-weight:500">' + item.nom + '</div><div style="font-size:0.72rem;color:#94a3b8;font-family:monospace">' + item.code_barre + '</div></td><td style="padding:10px 8px;text-align:center">' + item.quantite + '</td><td style="padding:10px 8px;text-align:right;color:#64748b">' + formatCurrency(item.prix_unitaire) + '</td><td style="padding:10px 8px;text-align:right;font-weight:600">' + formatCurrency(item.prix_total) + '</td></tr>';
+    }
+    html += '</tbody>';
+    html += '<tfoot><tr style="border-top:2px solid #e2e8f0"><td colspan="3" style="padding:12px 8px;font-weight:700">Total</td><td style="padding:12px 8px;text-align:right;font-weight:700;color:#1e3a8a;font-size:1rem">' + formatCurrency(s.montant_total) + '</td></tr></tfoot>';
+    html += '</table>';
+  } else {
+    html += '<div style="text-align:center;padding:30px;color:#94a3b8"><div style="font-size:1.5rem;margin-bottom:8px">🛒</div>Panier vide</div>';
+  }
+
+  document.getElementById('panierContent').innerHTML = html;
+}
+
+function closePanier() { document.getElementById('panierModal').classList.remove('show'); }
+
+loadAllSessions();
+setInterval(loadAllSessions, 15000);
+</script>
+</body>
+</html>
