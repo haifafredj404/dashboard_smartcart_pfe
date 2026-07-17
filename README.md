@@ -1,6 +1,19 @@
 # 🛒 Smart Cart Supermarket — Dashboard Administrateur
 **PFE — Système de Chariots Intelligents**
 
+description:Smart Cart Dashboard est une interface d'administration développée dans le cadre d'un projet de fin d'études. Elle permet de gérer les chariots intelligents, les produits, les sessions d'achat, les notifications et les statistiques en temps réel.
+
+## 🚀 Technologies
+
+- Node.js
+- Express.js
+- MySQL
+- HTML5
+- CSS3
+- JavaScript
+- JWT Authentication
+- Chart.js
+
 ---
 
 ## 📁 Structure du Projet
@@ -59,27 +72,15 @@ Ouvrez MySQL et exécutez :
 source /chemin/vers/smartcart/backend/config/database.sql
 ```
 
-Ou via la CLI :
-```bash
-mysql -u root -p < backend/config/database.sql
-```
-
 ### 3. Backend
 
 ```bash
-cd backend
 npm install
 ```
 
 Configurez `.env` si nécessaire :
 ```env
-PORT=5000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=votre_mot_de_passe
-DB_NAME=smartcart_db
-JWT_SECRET=smartcart_secret_key_2026
-```
+Configurez votre fichier `.env` selon votre environnement.
 
 Démarrez le serveur :
 ```bash
@@ -99,91 +100,38 @@ Ouvrez votre navigateur sur : **http://localhost:5000**
 
 ## 🔑 Accès Démo
 
-| Champ        | Valeur                  |
-|-------------|-------------------------|
-| Email        | admin@smartcart.tn      |
-| Mot de passe | admin123                |
+Des comptes de démonstration peuvent être créés via la base de données fournie.
 
 ---
 
-## 📡 API Endpoints
+# 📷 Captures d'écran
 
-### Authentification
-| Méthode | Route             | Description         |
-|---------|-------------------|---------------------|
-| POST    | /api/auth/login   | Connexion admin     |
-| GET     | /api/auth/me      | Profil connecté     |
+## 🔐 Login
 
-### Dashboard
-| Méthode | Route                              | Description             |
-|---------|------------------------------------|-------------------------|
-| GET     | /api/dashboard/stats               | KPIs principaux         |
-| GET     | /api/dashboard/ventes-semaine      | Évolution 7 jours       |
-| GET     | /api/dashboard/activite-recente    | Dernières actions       |
-| GET     | /api/dashboard/distribution-categories | Répartition ventes |
-
-### Chariots
-| Méthode | Route              | Description           |
-|---------|--------------------|-----------------------|
-| GET     | /api/chariots      | Liste tous les chariots|
-| GET     | /api/chariots/:id  | Détail + sessions     |
-| POST    | /api/chariots      | Ajouter               |
-| PUT     | /api/chariots/:id  | Modifier              |
-| DELETE  | /api/chariots/:id  | Supprimer             |
-
-### Sessions
-| Méthode | Route              | Description           |
-|---------|--------------------|-----------------------|
-| GET     | /api/sessions      | Liste sessions        |
-| GET     | /api/sessions/:id  | Détail + panier       |
-
-### Produits
-| Méthode | Route              | Description           |
-|---------|--------------------|-----------------------|
-| GET     | /api/produits      | Liste produits        |
-| POST    | /api/produits      | Ajouter               |
-| PUT     | /api/produits/:id  | Modifier              |
-| DELETE  | /api/produits/:id  | Désactiver            |
-
-### Notifications
-| Méthode | Route                          | Description         |
-|---------|--------------------------------|---------------------|
-| GET     | /api/notifications             | Toutes              |
-| PUT     | /api/notifications/:id/lire    | Marquer lue         |
-| PUT     | /api/notifications/lire-tout   | Tout marquer lu     |
-
-### Statistiques
-| Méthode | Route                                  | Description            |
-|---------|----------------------------------------|------------------------|
-| GET     | /api/statistiques/heures-pointe        | Trafic par heure       |
-| GET     | /api/statistiques/revenus-categories   | Revenus par catégorie  |
-| GET     | /api/statistiques/performance-chariots | Performance chariots   |
+![Login](screenshots/login.png)
 
 ---
 
-## 🎨 Design
+## 📊 Dashboard
 
-- **Palette** : Bleu Marine `#1e3a8a` + Blanc + Gris clair
-- **Police** : Plus Jakarta Sans (Google Fonts)
-- **Composants** : CSS pur (sans framework)
-- **Graphiques** : Chart.js 4.4
-- **Auth** : JWT (8h d'expiration)
+![Dashboard](screenshots/dashboard.png)
 
 ---
 
-## 📋 Pages Disponibles
+## 🛒 Gestion des Produits
 
-| Page            | Description                                |
-|-----------------|--------------------------------------------|
-| Login           | Authentification sécurisée JWT             |
-| Tableau de Bord | KPIs + graphiques + activité récente       |
-| Chariots        | Grille avec batterie, statut, emplacement  |
-| Sessions        | Liste temps réel des clients actifs        |
-| Statistiques    | Heures de pointe + revenus catégories      |
-| Produits        | Catalogue CRUD avec filtres               |
-| Notifications   | Historique + actions                      |
-| Paramètres      | Config profil + système                   |
+![Produits](screenshots/produits.png)
 
 ---
+
+## 📈 Statistiques
+
+![Statistiques](screenshots/statistiques.png)
+
+---
+
+## 🚗 Gestion des Chariots
+
+![Chariots](screenshots/chariots.png)
 
 *© 2026 Projet d'Ingénierie Smart Cart — PFE*
